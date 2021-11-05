@@ -38,16 +38,15 @@ app.get('/restaurants',(req,res)=>{
 })
 
 //query example
-app.get('/restaurant',(req,res)=>{
-    var query={}
-    if(req.query.cityId){
-        query={city:req.query.cityId}
-    }else if(req.query.mealtype){
-        query={"type.mealtype":req.query.mealtype}
-
+app.get('/restaurant',(req,res) =>{
+    var query = {}
+    if(req.query.stateId){
+        query={state_id:Number(req.query.stateId)}
+        console.log(query)
+    }else if(req.query.mealtype_id){
+        query={"mealTypes.mealtype_id":Number(req.query.mealtype_id)}
     }
-    db.collection('restaurants').find(query).toArray
-    ((err,result) =>{
+    db.collection('restaurants').find(query).toArray((err,result)=>{
         if(err) throw err;
         res.send(result)
     })
