@@ -1,4 +1,3 @@
-
 var express = require('express');
 const app = express();
 const bodyParser=require('body-parser');
@@ -64,20 +63,23 @@ app.get('/filter/:mealType',(req,res)=>{
         skip = Number(req.query.skip);
         limit = Number(req.query.limit)
     }
-    var mealType=req.params.mealType;
-    var query={"type.mealtype":mealType};
+    var mealType = req.params.mealType;
+    var query = {"mealTypes.mealtype_id":Number(mealType)};
     if(req.query.cuisine && req.query.lcost && req.query.hcost){
         query={
-            $and:[{cost:{$gt:Number(req.query.lcost),$lt:Number(req.query.hcost)}}],"Cuisine.cuisine":req.query.cuisine,"type.mealtype":mealType
+            $and:[{cost:{$gt:Number(req.query.lcost),$lt:Number(req.query.hcost)}}],
+            "cuisines.cuisine_id":Number(req.query.cuisine),
+            "mealTypes.mealtype_id":Number(mealType)
         }
     }
     else if(req.query.cuisine){
-        query={"type.mealtype":mealType,"Cuisine.cuisine":req.query.cuisine}
+        query = {"mealTypes.mealtype_id":mealType,"cuisines.cuisine_id":Number(req.query.cuisine) }
+        //query={"mealTypes.mealtype_id":mealType,"Cuisines.cuisine_id":req.query.cuisine}
     }
     else if(req.query.lcost && req.query.hcost){
         var lcost = Number(req.query.lcost);
         var hcost = Number(req.query.hcost);
-        query={$and:[{cost:{$gt:lcost,$lt:hcost}}],"type.mealtype":mealType}
+        query={$and:[{cost:{$gt:lcost,$lt:hcost}}],"mealTypes.mealtype_id":Number(mealType)}
     }
     db.collection('restaurants').find(query).sort(sort).skip(skip).limit(limit).toArray((err,result)=>{
         if(err) throw err;
@@ -97,16 +99,10 @@ app.get('/quicksearch',(req,res)=>{
 //restaurant details
 app.get('/details/:id',(req,res)=>{
     var id=req.params.id
-    db.collection('restaurants').find({_id:id}).toArray((err,result)=>{
+    db.collection('restaurants').find({restaurant_id:Number(id)}).toArray((err,result)=>{
         if(err) throw err;
         res.send(result)
-    })
-    /*
-    db.collection('restaurants').findOne({_id:id},(err,result)=>{
-        if(err) throw err;
-        res.send(result)
-    })
-    */
+    }) 
 })
 //place order 
 app.post('/placeOrder',(req,res)=>{
@@ -173,5 +169,6 @@ MongoClient.connect(mongourl, (err,client) => {
         console.log(`listening on port no ${port}`)
     });
 })
+
 
 
